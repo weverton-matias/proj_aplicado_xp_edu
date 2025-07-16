@@ -25,3 +25,27 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         source: "projeto.zip"
         target: "~"
+
+    - name: Executar comandos remotos na EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "Parando Servidor"
+          sudo systemctl stop apache2
+
+          echo "Removendo projeto antigo (backup opcional pode ser feito)"
+          sudo rm -rf /var/www/html/*
+
+          echo "Descompactando novo projeto"
+          unzip -o ~/projeto.zip -d /var/www/html
+
+          echo "Iniciando Apache"
+          sudo systemctl start apache2
+
+    - name: Verificação de health-check
+      run: |
+        sleep 5
+        curl -f http://${{ secrets.EC2_HOST }}/ || exit 1
