@@ -15,7 +15,7 @@ jobs:
 
     - name: Compactar o projeto
       run: |
-        zip -r projeto.zip . -x *
+        zip -r projeto.zip ./app -x "*.git*" ".github/*"
 
     - name: Copiar o arquivo para a máquina EC2
       uses: appleboy/scp-action@v0.1.3
