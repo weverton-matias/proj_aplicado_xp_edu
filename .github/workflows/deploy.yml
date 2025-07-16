@@ -15,8 +15,7 @@ jobs:
 
     - name: Compactar o projeto
       run: |
-        cd app
-        tar -czf ../projeto.tar.gz . --exclude='.git' --exclude='.github'
+        tar -czf projeto.tar.gz -C app .
 
     - name: Copiar o arquivo para a máquina EC2
       uses: appleboy/scp-action@v0.1.3
@@ -42,6 +41,10 @@ jobs:
 
           echo "Descompactando novo projeto"
           sudo tar -xzf projeto.tar.gz -C /var/www/html
+
+          echo "Corrigindo permissões"
+          sudo chown -R www-data:www-data /var/www/html
+          sudo chmod -R 755 /var/www/html
 
           echo "Iniciando Apache"
           sudo systemctl start apache2
