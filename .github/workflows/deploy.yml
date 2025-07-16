@@ -23,7 +23,7 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "projeto.zip"
+        source: "projeto.tar.gz"
         target: "~"
 
     - name: Executar comandos remotos na EC2
