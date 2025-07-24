@@ -1,4 +1,5 @@
 <?php
+echo $forcando_erro_de_sintaxe
 /**
  * Front to the WordPress application. This file doesn't do anything, but loads
  * wp-blog-header.php which does and tells WordPress to load the theme.
