@@ -11,16 +11,16 @@ jobs:
 
     steps:
     - name: Checkout do código
-      if: false
+      if: true
       uses: actions/checkout@v3
 
     - name: Compactar o projeto
-      if: false
+      if: true
       run: |
         tar -czf projeto.tar.gz -C app .
 
     - name: Copiar o arquivo para a máquina EC2
-      if: false
+      if: true
       uses: appleboy/scp-action@v0.1.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -30,7 +30,7 @@ jobs:
         target: "~"
 
     - name: Executar comandos remotos na EC2
-      if: false
+      if: true
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -57,6 +57,7 @@ jobs:
           sudo systemctl start apache2
 
     - name: Verificação de health-check
+      if: true
       id: healthcheck
       continue-on-error: true
       run: |
@@ -64,11 +65,22 @@ jobs:
         sleep 5
         curl -f http://${{ secrets.EC2_HOST }}
     
-    - name: Rollback se health-check falhar
-      run: |
-       echo "Resultado da etapa healthcheck: $HEALTHCHECK_OUTCOME"
-      env:
-        HEALTHCHECK_OUTCOME: ${{ steps.healthcheck.outcome }}
+    - name: Rollback se health-check não foi sucesso
+      if: steps.healthcheck.outcome != 'success'
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "Rollback iniciado"
+          sudo systemctl stop apache2
+          sudo rm -rf /var/www/html/*
+          sudo tar -xzf ~/backup_ultimo.tar.gz -C /
+          sudo chown -R www-data:www-data /var/www/html
+          sudo chmod -R 755 /var/www/html
+          sudo systemctl start apache2
+
 
 
 
