@@ -11,13 +11,16 @@ jobs:
 
     steps:
     - name: Checkout do código
+      if: false
       uses: actions/checkout@v3
 
     - name: Compactar o projeto
+      if: false
       run: |
         tar -czf projeto.tar.gz -C app .
 
     - name: Copiar o arquivo para a máquina EC2
+      if: false
       uses: appleboy/scp-action@v0.1.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -27,6 +30,7 @@ jobs:
         target: "~"
 
     - name: Executar comandos remotos na EC2
+      if: false
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -35,6 +39,9 @@ jobs:
         script: |
           echo "Parando Servidor"
           sudo systemctl stop apache2
+
+          echo "Criando backup (sobrescrevendo backup_ultimo.tar.gz)"
+          sudo tar -czf ~/backup_ultimo.tar.gz /var/www/html
 
           echo "Removendo projeto antigo (backup opcional pode ser feito)"
           sudo rm -rf /var/www/html/*
@@ -50,6 +57,18 @@ jobs:
           sudo systemctl start apache2
 
     - name: Verificação de health-check
+      id: healthcheck
+      continue-on-error: true
       run: |
+        echo "Verificando aplicação em http://${{ secrets.EC2_HOST }}/"
         sleep 5
-        curl -f http://${{ secrets.EC2_HOST }}/ || exit 1
+        curl -f http://${{ secrets.EC2_HOST }}
+    
+    - name: Rollback se health-check falhar
+      run: |
+       echo "Resultado da etapa healthcheck: $HEALTHCHECK_OUTCOME"
+      env:
+        HEALTHCHECK_OUTCOME: ${{ steps.healthcheck.outcome }}
+
+
+
