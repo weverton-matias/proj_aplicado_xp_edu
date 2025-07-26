@@ -1,0 +1,45 @@
+---
+- hosts: wordpress
+  become: true
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Atualizar pacotes APT
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependências do Apache e PHP
+      apt:
+        name:
+          - apache2
+          - php
+          - php-mysql
+          - libapache2-mod-php
+          - unzip
+          - git
+        state: present
+
+    - name: Remover conteúdo padrão do Apache
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: Criar diretório /var/www/html
+      file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Clonar aplicação WordPress com CRM
+      git:
+        repo: "{{ wordpress_repo }}"
+        dest: /var/www/html
+        force: yes
+
+    - name: Reiniciar o Apache
+      service:
+        name: apache2
+        state: restarted
