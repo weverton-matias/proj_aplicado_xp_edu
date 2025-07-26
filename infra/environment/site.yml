@@ -33,11 +33,25 @@
         group: www-data
         mode: '0755'
 
-    - name: Clonar aplicação WordPress com CRM
+    - name: Clonar repositório para pasta temporária
       git:
         repo: "{{ wordpress_repo }}"
-        dest: /var/www/html
+        dest: /tmp/proj
         force: yes
+
+    - name: Copiar conteúdo da pasta /app para o Apache root
+      synchronize:
+        src: /tmp/proj/app/
+        dest: /var/www/html/
+        delete: yes
+        recursive: yes
+        
+    - name: Ajustar permissões da pasta /var/www/html
+      file:
+        path: /var/www/html
+        owner: www-data
+        group: www-data
+        recurse: yes
 
     - name: Reiniciar o Apache
       service:
