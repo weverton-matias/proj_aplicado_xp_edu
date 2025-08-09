@@ -288,7 +288,6 @@ function zeroBSCRM_admin_top_menu( $branding = 'zero-bs-crm', $page = 'dash' ) {
 
 			<menu-section>
 			<a class="item" target="_blank" href="https://www.linkedin.com/in/weverton-matias">Meu Linkedin</a>
-			<a class="item" target="_blank" href="https://github.com/weverton-matias">Meu Github</a>
 			<a class="item" target="_blank" href="https://xpe.edu.br/pos-graduacao">Portal XP</a>
 			
 
